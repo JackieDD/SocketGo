@@ -18,10 +18,30 @@ namespace SocketGo
     public partial class Server : Form
     {
 
+        private int m_numConnections;   // the maximum number of connections the sample is designed to handle simultaneously 
+        private int m_receiveBufferSize;// buffer size to use for each socket I/O operation 
+        BufferManager m_bufferManager;  // represents a large reusable set of buffers for all socket operations
+        const int opsToPreAlloc = 2;    // read, write (don't alloc buffer space for accepts)
+        private Socket listenSocket;            // the socket used to listen for incoming connection requests
+                                                // pool of reusable SocketAsyncEventArgs objects for write, read and accept socket operations
+        //SocketAsyncEventArgsPool m_readWritePool;
+        int m_totalBytesRead;           // counter of the total # bytes received by the server
+        int m_numConnectedSockets;      // the total number of clients connected to the server 
+        Semaphore m_maxNumberAcceptedClients;
+
+
+        private Socket clientSocket;
+        private BufferManager bufferManager;
+        private SocketAsyncEventArgs listenSocketAsyncEventArgs;
+        private SocketAsyncEventArgs sendSocketAsyncEventArgs;
+        private SocketAsyncEventArgs receiveSocketAsyncEventArgs;
 
         public Server()
         {
             InitializeComponent();
+            m_bufferManager= new BufferManager(1024 * 1 * opsToPreAlloc,
+            1024);
+          
         }
 
         /// <summary>
@@ -29,30 +49,75 @@ namespace SocketGo
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Button1_Click(object sender, EventArgs e)
+        private  void Button1_ClickAsync(object sender, EventArgs e)
         {
             try
             {
+                button1.Enabled = false;
                 IPAddress iPAddress = IPAddress.Parse(txt_IP.Text); //IP地址
                 IPEndPoint iPEndPoint = new IPEndPoint(iPAddress, int.Parse(txt_Port.Text)); //IP+端口号
                                                                                              
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                socket.Bind(iPEndPoint); //绑定
-                socket.Listen(10);
+                listenSocket.Bind(iPEndPoint); //绑定
+                listenSocket.Listen(10);
                 AppendMessage("服务器开始监听...", false);
-                Thread thread = new Thread(AcceptMessage);
-                thread.Start(socket);
+
+                listenSocketAsyncEventArgs = new SocketAsyncEventArgs();
+                listenSocketAsyncEventArgs.Completed += SocketAsyncEventArgs_Completed;
+                listenSocket.AcceptAsync(listenSocketAsyncEventArgs);
+
+                
+
+                //Thread thread = new Thread(AcceptMessage);
+                // thread.Start(socket);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+                button1.Enabled = true;
             }
            
 
         }
 
-        Dictionary<string, Socket> dic = new Dictionary<string, Socket>();//通信用socket
+        private void SocketAsyncEventArgs_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            AppendMessage("客户端连接...");
+            clientSocket = e.AcceptSocket;
+            //var AcceptSocket = e.AcceptSocket;
+            AppendMessage("客户地址: "+ e.AcceptSocket.RemoteEndPoint);
+
+            receiveSocketAsyncEventArgs = new SocketAsyncEventArgs();
+            receiveSocketAsyncEventArgs.Completed += ReceiveSocketAsyncEventArgs_Completed;
+            byte[] bytes = new byte[1024];
+            receiveSocketAsyncEventArgs.SetBuffer(bytes, 0, 1024);
+            clientSocket.ReceiveAsync(receiveSocketAsyncEventArgs);
+
+
+        }
+
+        private void ReceiveSocketAsyncEventArgs_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            if(e.SocketError==SocketError.Success && e.BytesTransferred > 0)
+            {
+                string message = Encoding.UTF8.GetString(e.Buffer);
+                AppendMessage(listenSocketAsyncEventArgs.AcceptSocket.RemoteEndPoint + ":" + message);
+                byte[] bytes = new byte[1024];
+                receiveSocketAsyncEventArgs.SetBuffer(bytes, 0, 1024);
+                clientSocket.ReceiveAsync(receiveSocketAsyncEventArgs);
+            }
+            else
+            {
+                clientSocket.Shutdown(SocketShutdown.Both);
+                clientSocket.Close();
+            }
+           
+        }
+
+
+
+        //Dictionary<string, Socket> dic = new Dictionary<string, Socket>();//通信用socket
 
         /// <summary>
         /// 接收socket信息
@@ -60,16 +125,17 @@ namespace SocketGo
         private void AcceptMessage(object soc)
         {
             Socket socket = soc as Socket;
-            while (true)
-            {
+            //while (true)
+            //{
                 //创建通信用socket 阻塞方法
                 Socket tSocket = socket.Accept();
+                clientSocket = tSocket;
                 AppendMessage("客户端连接...");
                 string point = tSocket.RemoteEndPoint.ToString();
                 AppendMessage("客户端地址 "+point);
                 Thread thread = new Thread(ReceiveMessage);
                 thread.Start(tSocket);
-            }
+            //}
             
         }
 
@@ -82,7 +148,7 @@ namespace SocketGo
                 //接收到字节数组
                 tSocket.Receive(bytes);
                 string message = Encoding.UTF8.GetString(bytes);
-                AppendMessage(tSocket.RemoteEndPoint.ToString()+":"+message);
+                AppendMessage(tSocket.RemoteEndPoint.ToString()+":"+message);                           
             }         
         }
 
@@ -138,6 +204,39 @@ namespace SocketGo
         private void Server_KeyPress(object sender, KeyPressEventArgs e)
         {
 
+            if (e.KeyChar == '\r')
+            {
+                Button2_Click(button2, EventArgs.Empty);
+            }
+         
+        }
+
+
+        /// <summary>
+        /// 监听全局回车为发送
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Client_KeyPress(object sender, KeyPressEventArgs e)        
+        {
+            if (e.KeyChar == '\r')
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void Button2_Click(object sender, EventArgs e)
+        {          
+            byte[] data = Encoding.UTF8.GetBytes(textBox1.Text);
+            clientSocket.Send(data);
+            AppendMessage("服务器：" + textBox1.Text);
+            textBox1.Text = string.Empty;
+        }
+
+        private void Button3_Click(object sender, EventArgs e)
+        {
+            clientSocket?.Shutdown(SocketShutdown.Both);
+            clientSocket?.Close();            
         }
     }
 }

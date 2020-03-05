@@ -37,6 +37,7 @@
             this.btn_Client = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.lbl_Msg = new System.Windows.Forms.TextBox();
+            this.button3 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txt_IP
@@ -63,7 +64,7 @@
             this.button1.TabIndex = 5;
             this.button1.Text = "监听";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.Button1_Click);
+            this.button1.Click += new System.EventHandler(this.Button1_ClickAsync);
             // 
             // button2
             // 
@@ -73,6 +74,7 @@
             this.button2.TabIndex = 6;
             this.button2.Text = "发送消息";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.Button2_Click);
             // 
             // label1
             // 
@@ -109,6 +111,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(720, 69);
             this.textBox1.TabIndex = 12;
+            this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Client_KeyPress);
             // 
             // lbl_Msg
             // 
@@ -122,11 +125,22 @@
             this.lbl_Msg.TabIndex = 21;
             this.lbl_Msg.TextChanged += new System.EventHandler(this.Lbl_Msg_TextChanged);
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(460, 20);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 22;
+            this.button3.Text = "关闭";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.Button3_Click);
+            // 
             // Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.lbl_Msg);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.btn_Client);
@@ -136,6 +150,7 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.txt_Port);
             this.Controls.Add(this.txt_IP);
+            this.KeyPreview = true;
             this.Name = "Server";
             this.Text = "Server";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
@@ -156,6 +171,7 @@
         private System.Windows.Forms.Button btn_Client;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox lbl_Msg;
+        private System.Windows.Forms.Button button3;
     }
 }
 

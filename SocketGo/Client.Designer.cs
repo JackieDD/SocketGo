@@ -36,6 +36,7 @@
             this.txt_IP = new System.Windows.Forms.TextBox();
             this.txt_send = new System.Windows.Forms.TextBox();
             this.lbl_Msg = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label2
@@ -107,14 +108,27 @@
             this.lbl_Msg.Location = new System.Drawing.Point(40, 57);
             this.lbl_Msg.Multiline = true;
             this.lbl_Msg.Name = "lbl_Msg";
+            this.lbl_Msg.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.lbl_Msg.Size = new System.Drawing.Size(720, 212);
             this.lbl_Msg.TabIndex = 20;
+            this.lbl_Msg.TextChanged += new System.EventHandler(this.Lbl_Msg_TextChanged);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(585, 16);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 21;
+            this.button1.Text = "断开";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
             // Client
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.lbl_Msg);
             this.Controls.Add(this.txt_send);
             this.Controls.Add(this.label2);
@@ -141,5 +155,6 @@
         private System.Windows.Forms.TextBox txt_IP;
         private System.Windows.Forms.TextBox txt_send;
         private System.Windows.Forms.TextBox lbl_Msg;
+        private System.Windows.Forms.Button button1;
     }
 }
