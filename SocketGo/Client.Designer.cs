@@ -104,7 +104,6 @@
             // 
             // lbl_Msg
             // 
-            this.lbl_Msg.Enabled = false;
             this.lbl_Msg.Location = new System.Drawing.Point(40, 57);
             this.lbl_Msg.Multiline = true;
             this.lbl_Msg.Name = "lbl_Msg";
@@ -140,6 +139,7 @@
             this.KeyPreview = true;
             this.Name = "Client";
             this.Text = "Client";
+            this.Load += new System.EventHandler(this.Client_Load);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Client_KeyPress);
             this.ResumeLayout(false);
             this.PerformLayout();

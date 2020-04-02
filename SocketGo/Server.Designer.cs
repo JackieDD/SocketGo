@@ -46,7 +46,7 @@
             this.txt_IP.Name = "txt_IP";
             this.txt_IP.Size = new System.Drawing.Size(100, 21);
             this.txt_IP.TabIndex = 0;
-            this.txt_IP.Text = "127.0.0.1";
+            this.txt_IP.Text = "0.0.0.0";
             // 
             // txt_Port
             // 
